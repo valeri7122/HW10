@@ -1,0 +1,20 @@
+{% extends "quoteapp/base.html" %}
+{% load extract_tags %}
+{% block content %}
+{% if quotes_list %}
+    {% for quote in quotes_list %}
+    <div class="quote" itemscope itemtype="http://schema.org/CreativeWork">
+        <span class="text" itemprop="text">{{quote.quote}}</span></br>
+        <span>by <small class="author" itemprop="author">{{quote.author}}</small>
+        <a href="author/{{quote.author_id}}" target="_self">(about)</a>
+        </span>
+        <div class="tags">
+            Tags:
+            {% for tag in quote.tags|tags %}
+            <a class="tag" href="">{{tag.name}}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}
