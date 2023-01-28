@@ -1,18 +1,62 @@
+from pymongo import MongoClient
 import psycopg2
 import json
 
 
-dbname = 'postgres'
+# MongoDB parameters
+USER = 'goitlearn'
+PASS = 'vbvb'
+DB_NAME = 'HomeWork9Database1'
+DOMAIN = 'cluster0.omrbmbh.mongodb.net'
+
+# PosgresDB parameters
 user = 'postgres'
+dbname = 'postgres'
 password = '123'
 
-def download():
+
+def from_mongo():
+    client = MongoClient(f"mongodb+srv://{USER}:{PASS}@{DOMAIN}/{DB_NAME}?retryWrites=true&w=majority", ssl=True)
+    try:
+        db = client.HomeWork9Database1
+        author_table = db.author.find()
+        quote_table = db.quote.find()
+
+        author_id_name_list = [] 
+        author_list = []
+        quote_list = []
+
+        for author in author_table:
+            author_id_name = {}
+            id = author.pop('_id')
+            author_id_name.update({id: author['fullname']})
+            author_id_name_list.append(author_id_name)
+            author_list.append(author)
+
+        for quote in quote_table:
+            quote.pop('_id')
+            quote.pop('_cls')
+            author_id = quote['author']
+            for author in author_id_name_list:
+                fullname = author.get(author_id)
+                if fullname:
+                    quote.update({'author': fullname})
+            quote_list.append(quote)
+
+        with open("data/authors.json", "w", encoding="utf-8") as fh:
+            json.dump(author_list, fh, ensure_ascii=False, indent=2)
+        with open("data/quotes.json", "w", encoding="utf-8") as fh:
+            json.dump(quote_list, fh, ensure_ascii=False, indent=2)
+    except:
+        pass
+
+
+def to_postgres():
     with psycopg2.connect(f"dbname={dbname} user={user} password={password}") as conn:
         with conn.cursor() as cur:
 
             query_sql = """ TRUNCATE TABLE quoteapp_author CASCADE """
             cur.execute(query_sql)
-
             query_sql = """ TRUNCATE TABLE quoteapp_tag CASCADE """
             cur.execute(query_sql)
 
@@ -62,19 +106,18 @@ def download():
                         quote_tag.update({"tag_id": tag_list.index(q)+1})
                         new_quote_tags.append(quote_tag)
                         j += 1
-
+                        
                 query_sql = """ insert into quoteapp_quote
                     select * from json_populate_recordset(NULL::quoteapp_quote, %s) """
                 cur.execute(query_sql, (json.dumps(new_quotes),))
-
                 query_sql = """ insert into quoteapp_tag
                     select * from json_populate_recordset(NULL::quoteapp_tag, %s) """
                 cur.execute(query_sql, (json.dumps(new_tags),))
-
                 query_sql = """ insert into quoteapp_quote_tags
                     select * from json_populate_recordset(NULL::quoteapp_quote_tags, %s) """
                 cur.execute(query_sql, (json.dumps(new_quote_tags),))          
 
 
 if __name__ == "__main__":
-    download()
+    from_mongo()
+    to_postgres()
