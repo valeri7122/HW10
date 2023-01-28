@@ -1,4 +1,4 @@
-from postgres_connection_upload import dbname, user, password
+from from_Mongo_to_Postgres import dbname, user, password
 
 """
 Django settings for quotes project.
