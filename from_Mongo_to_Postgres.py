@@ -16,8 +16,8 @@ password = '123'
 
 
 def from_mongo():
-    client = MongoClient(f"mongodb+srv://{USER}:{PASS}@{DOMAIN}/{DB_NAME}?retryWrites=true&w=majority", ssl=True)
     try:
+        client = MongoClient(f"mongodb+srv://{USER}:{PASS}@{DOMAIN}/{DB_NAME}?retryWrites=true&w=majority", ssl=True)
         db = client.HomeWork9Database1
         author_table = db.author.find()
         quote_table = db.quote.find()
