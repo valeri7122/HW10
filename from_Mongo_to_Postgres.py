@@ -5,7 +5,7 @@ import json
 
 # MongoDB parameters
 USER = 'goitlearn'
-PASS = 'vbvb'
+PASS = 'vbv'
 DB_NAME = 'HomeWork9Database1'
 DOMAIN = 'cluster0.omrbmbh.mongodb.net'
 
